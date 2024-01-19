@@ -1,11 +1,72 @@
 <script lang="ts">
+  // components
   import svelteLogo from './assets/svelte.svg'
   import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import VoteBox from './components/VoteBox.svelte'
+  import ResultsChart from './components/ResultsChart.svelte';
+    import { statusCheck } from './utils/utils';
+
+  // constants
+  const BASE_URL = "http://localhost:8000";
+  
+  // TODO: Update to state variables
+  const pollId = "409a93781434995e89ec7707";
+  const answers = ["Answer 1", "Answer 2"];
+  const question = "What is better- cats or dogs?";
+  const chartType = "bar";
+
+  /**
+   * Retrieves data for a chart given its id
+   * @param chartId - the id of the chart to get data for
+   */
+  async function getChartData(pollId:String) {
+    try {
+      console.log(`${BASE_URL}/poll/${pollId}`);
+      let res = await fetch(`${BASE_URL}/poll/${pollId}`);
+      await statusCheck(res);
+      console.log(res);
+
+    } catch (err) {
+      console.error(err);
+      // alert(err);
+    }
+  }
+
+  /**
+   * Allows the user to vote on a poll
+   * @param e - the event dispatched from the child which has
+   * the voted value
+   */
+  async function makeVote(e:any) {
+    try {
+      let params = new FormData();
+      params.append("vote", e.detail.vote)
+
+      let res = await fetch(`${BASE_URL}/poll/${pollId}/vote`, {
+        method: "POST",
+        body: params
+      });
+
+      await statusCheck(res);
+    } catch (err) {
+      alert(err);
+    }
+  }
+
+  getChartData(pollId)
 </script>
 
 <main>
-  <div>
+  <h1>RealtimePolls</h1>
+  <p>{question}</p>
+  <ResultsChart
+    data={answers}
+  />
+  <VoteBox
+    answers={answers}
+    on:vote={makeVote}
+  />
+  <!-- <div>
     <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
       <img src={viteLogo} class="logo" alt="Vite Logo" />
     </a>
@@ -25,7 +86,7 @@
 
   <p class="read-the-docs">
     Click on the Vite and Svelte logos to learn more
-  </p>
+  </p> -->
 </main>
 
 <style>
