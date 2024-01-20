@@ -8,13 +8,14 @@
   // constants
   const dispatch = createEventDispatcher();
 
-  let voteValue:String = '';
+  let voteValue:String | undefined;
 
   function vote() {
     dispatch('vote', {
       vote: voteValue
     });
   }
+
 </script>
 
 <form on:submit|preventDefault={vote}>
@@ -30,7 +31,7 @@
       <label for={`answer-${i}`}>{answer}</label>
     </div>
   {/each}
-  <button>
+  <button disabled='{!voteValue}'>
     Vote!
   </button>
 </form>

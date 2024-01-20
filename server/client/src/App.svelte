@@ -4,16 +4,19 @@
   import viteLogo from '/vite.svg'
   import VoteBox from './components/VoteBox.svelte'
   import ResultsChart from './components/ResultsChart.svelte';
-    import { statusCheck } from './utils/utils';
+  import { onMount } from 'svelte';
+  import { statusCheck } from './utils/utils';
+    import { parse } from 'dotenv';
 
   // constants
   const BASE_URL = "http://localhost:8000";
   
   // TODO: Update to state variables
   const pollId = "409a93781434995e89ec7707";
-  const answers = ["Answer 1", "Answer 2"];
-  const question = "What is better- cats or dogs?";
-  const chartType = "bar";
+  let answers:string[] = [];
+  let votes:string[]
+  let question:string = "";
+  let chartType:string = "";
 
   /**
    * Retrieves data for a chart given its id
@@ -21,10 +24,16 @@
    */
   async function getChartData(pollId:String) {
     try {
-      console.log(`${BASE_URL}/poll/${pollId}`);
-      let res = await fetch(`${BASE_URL}/poll/${pollId}`);
+      let res = await fetch(`/poll/${pollId}`);
       await statusCheck(res);
-      console.log(res);
+      let parsedAnswers = await res.json();
+
+      console.log(parsedAnswers)
+
+      answers = parsedAnswers.answers;
+      question = parsedAnswers.question;
+      votes = parsedAnswers.votes;
+      chartType = parsedAnswers.type;
 
     } catch (err) {
       console.error(err);
@@ -40,11 +49,12 @@
   async function makeVote(e:any) {
     try {
       let params = new FormData();
-      params.append("vote", e.detail.vote)
+      params.append("vote", e.detail.vote);
 
-      let res = await fetch(`${BASE_URL}/poll/${pollId}/vote`, {
+      let res = await fetch(`/poll/${pollId}/vote`, {
         method: "POST",
-        body: params
+        body: params,
+        credentials: 'include'
       });
 
       await statusCheck(res);
@@ -53,14 +63,17 @@
     }
   }
 
-  getChartData(pollId)
+
+  onMount(() => {
+    getChartData(pollId)
+  })
 </script>
 
 <main>
-  <h1>RealtimePolls</h1>
+  <h1>Section AD</h1>
   <p>{question}</p>
   <ResultsChart
-    data={answers}
+    data={votes}
   />
   <VoteBox
     answers={answers}
